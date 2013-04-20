@@ -1,11 +1,6 @@
 package Optimizer;
 import java.util.concurrent.*;
-public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
-	/*
-	 * Debugging parameters
-	 */
-	public int iteration = 0;
-	public int playerNo = 0;
+public class UtilityFunction extends RecursiveTask<Double> {
 	/*
 	 * weight parameter
 	 */
@@ -16,62 +11,10 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 	double holenumber;
 	double wellnumber;
 	double pileheight;
+	State s;
+	int[] move;
 	
-	// Fitness parameters
-	public long L = 0;
-	public long Pmax = 0;
-	public long Psum = 0;
-	public long Hmax = 0;
-	public long Hsum = 0;
-	public long Rmax = 0;
-	public long Rsum = 0;
-	public long Cmax = 0;
-	public long Csum = 0;
-	public long count = 0;
-
-	/**
-	 * Constructor
-	 * 
-	 * @param LH
-	 *            landing height weight
-	 * @param RowClear
-	 *            cleared row weight
-	 * @param RT
-	 *            row transition weight
-	 * @param CT
-	 *            column transition weight
-	 * @param Hole
-	 *            hole number weight
-	 * @param Well
-	 *            well number weight
-	 * @param PH
-	 *            pile height weight
-	 */
-	public PlayerSkeletonUltimate(double LH, double RowClear, double RT, double CT,
-			double Hole, double Well, double PH) {
-		landheight 			= LH;
-		rowclear 			= RowClear;
-		rowtransition 		= RT;
-		columntransition 	= CT;
-		holenumber 			= Hole;
-		wellnumber 			= Well;
-		pileheight 			= PH;
-	}
-
-	/**
-	 * Constructor
-	 */
-	public PlayerSkeletonUltimate() {// initial weight
-		landheight 			= -3.3200740;
-		rowclear 			= 2.70317569;
-		rowtransition 		= -2.7157289;
-		columntransition 	= -5.1061407;
-		holenumber 			= -6.9380080;
-		wellnumber 			= -2.4075407;
-		pileheight 			= -1.0;// feature added
-	}
-
-	public PlayerSkeletonUltimate(double[] parameters) {
+	public UtilityFunction(State s, int[] move, double[] parameters) {
 		landheight = parameters[0];
 		rowclear = parameters[1];
 		rowtransition = parameters[2];
@@ -79,48 +22,10 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 		holenumber = parameters[4];
 		wellnumber = parameters[5];
 		pileheight = parameters[6];
+		this.s = s;
+		this.move = move;
 	}
 	
-	public PlayerSkeletonUltimate(double[] parameters, int iteration, int playerNo) {
-		landheight = parameters[0];
-		rowclear = parameters[1];
-		rowtransition = parameters[2];
-		columntransition = parameters[3];
-		holenumber = parameters[4];
-		wellnumber = parameters[5];
-		pileheight = parameters[6];
-		this.iteration = iteration;
-		this.playerNo = playerNo;
-	}
-	
-	/**
-	 * pick the move with best utility
-	 * @param s 
-	 * 			current state
-	 * @param legalMoves
-	 * 			all the legal moves
-	 * @return
-	 * 			chosen move with best utility
-	 */
-	public int pickMove(State s, int[][] legalMoves) {
-		double[] eval = new double[legalMoves.length];
-		int maxId = 0;
-		
-		
-		for (int i = 0; i<eval.length; i++) {
-			//reward
-			
-			//utility function
-			eval[i] = utilityFunction_v2(s, legalMoves[i]);
-			
-			if ( (i > 0) && (eval[i] > eval[maxId]) )
-				maxId = i;
-		}
-	
-		return maxId;
-	}
-
-
 	/**
 	 * Calculate the utility of each legal move
 	 * 
@@ -134,7 +39,7 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 
 		// simulate make move
 		
-		long completed 		= s.getRowsCleared();
+		int completed 		= s.getRowsCleared();
 		int orient 			= move[State.ORIENT];
 		int slot 			= move[State.SLOT];
 		int nextPiece 		= s.getNextPiece();
@@ -393,74 +298,8 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 		return well;
 	}
 
-	/**
-	 * main function
-	 */
-	public void play() {
-		State s = new State();
-		//new TFrame(s);
-		while (!s.hasLost()) {
-			/*
-			if (count > 50000) {
-				break;
-			}// for debugging
-			*/
-			s.makeMove(pickMove(s, s.legalMoves()));
-			/*
-			 * Four Parameter: useful for PSO
-			 */
-			// Join
-			int pileHeight = getMax(s.getTop());
-			int numHoles = GetNumberOfHoles(s.getTop(), s.getField());
-			int rowTransit = GetRowTransitions(s.getField());
-			int colTransit = GetColumnTransitions(s.getField());
-			
-			
-			Pmax = Math.max(Pmax, pileHeight);
-			Psum += pileHeight;
-			Hmax = Math.max(Hmax, numHoles);
-			Hsum += numHoles;
-			Rmax = Math.max(Rmax, rowTransit);
-			Rsum += rowTransit;
-			Cmax = Math.max(Cmax, colTransit);
-			Csum += colTransit;
-			count++;
-
-			 //s.draw();
-			 //s.drawNext(0, 0);
-//			System.out.println("new   " + s.getRowsCleared());
-			/*
-			if (count == 1000) {
-				System.out.println("Iteration " + iteration + " Player " + playerNo + " Now cleared: " + s.getRowsCleared());//for debugging
-				return;
-			}
-			*/
-			if (count % 100000 == 0) {
-				System.out.println("Iteration " + iteration + " Player " + playerNo + " Now cleared: " + s.getRowsCleared());//for debugging
-			}
-			/*
-			  try { Thread.sleep(3); } catch (InterruptedException e) {
-			  e.printStackTrace(); }
-			  */
-			 
-		}
-		L = s.getRowsCleared();
-		System.out.println("You have completed " + s.getRowsCleared()
-				+ " rows.");
-	}
-
-	/**
-	 * compute
-	 * Used for optimization using PSO
-	 */
 	@Override
-	protected FitParameters compute(){
-		play();
-		return new FitParameters(L, Pmax, Psum, Hmax, Hsum, Rmax, Rsum, Cmax, Csum, count);
-	}
-	
-	static public void main(String[] args) {
-		PlayerSkeletonUltimate player = new PlayerSkeletonUltimate();
-		player.play();
+	protected Double compute() {
+		return utilityFunction_v2(s, move);
 	}
 }

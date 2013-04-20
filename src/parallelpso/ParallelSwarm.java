@@ -93,7 +93,7 @@ public class ParallelSwarm extends Swarm{
 					neighborhood.update(this, particles[i]);
 				}
 				
-				System.out.println("Particle " + i + " has position: " + particles[i].toString());//for debugging
+				System.out.println("Particle " + i + " has position: " + particles[i].toString() + " has fitness: " + fit);//for debugging
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 				return;

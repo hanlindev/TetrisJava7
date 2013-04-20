@@ -12,7 +12,8 @@ public class Optimizer {
 	static public void main(String[] args) throws Exception{
 		int numProcess = Integer.parseInt(args[0]);
 		int iterations = Integer.parseInt(args[1]);
-		BufferedWriter bw = new BufferedWriter(new FileWriter("bestPositions.txt"));
+		String outFilePath = args[2];
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outFilePath));
 		MyParticle aParticle = new MyParticle();
 		Swarm swarm = new ParallelSwarm(30, aParticle, new MyFitnessFunction(numProcess), numProcess);
 		double inertia = 0.72, particleInc = 1.42, globalInc = 1.42, maxVelocity = 0.5;

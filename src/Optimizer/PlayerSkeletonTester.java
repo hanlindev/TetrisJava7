@@ -1,6 +1,6 @@
 package Optimizer;
 import java.util.concurrent.*;
-public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
+public class PlayerSkeletonTester extends RecursiveTask<Long>{
 	/*
 	 * Debugging parameters
 	 */
@@ -47,7 +47,7 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 	 * @param PH
 	 *            pile height weight
 	 */
-	public PlayerSkeletonUltimate(double LH, double RowClear, double RT, double CT,
+	public PlayerSkeletonTester(double LH, double RowClear, double RT, double CT,
 			double Hole, double Well, double PH) {
 		landheight 			= LH;
 		rowclear 			= RowClear;
@@ -61,7 +61,7 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 	/**
 	 * Constructor
 	 */
-	public PlayerSkeletonUltimate() {// initial weight
+	public PlayerSkeletonTester() {// initial weight
 		landheight 			= -3.3200740;
 		rowclear 			= 2.70317569;
 		rowtransition 		= -2.7157289;
@@ -71,7 +71,7 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 		pileheight 			= -1.0;// feature added
 	}
 
-	public PlayerSkeletonUltimate(double[] parameters) {
+	public PlayerSkeletonTester(double[] parameters) {
 		landheight = parameters[0];
 		rowclear = parameters[1];
 		rowtransition = parameters[2];
@@ -81,7 +81,7 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 		pileheight = parameters[6];
 	}
 	
-	public PlayerSkeletonUltimate(double[] parameters, int iteration, int playerNo) {
+	public PlayerSkeletonTester(double[] parameters, int iteration, int playerNo) {
 		landheight = parameters[0];
 		rowclear = parameters[1];
 		rowtransition = parameters[2];
@@ -431,13 +431,16 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 //			System.out.println("new   " + s.getRowsCleared());
 			/*
 			if (count == 1000) {
+				L = s.getRowsCleared();
 				System.out.println("Iteration " + iteration + " Player " + playerNo + " Now cleared: " + s.getRowsCleared());//for debugging
 				return;
 			}
 			*/
+			/*
 			if (count % 100000 == 0) {
 				System.out.println("Iteration " + iteration + " Player " + playerNo + " Now cleared: " + s.getRowsCleared());//for debugging
 			}
+			*/
 			/*
 			  try { Thread.sleep(3); } catch (InterruptedException e) {
 			  e.printStackTrace(); }
@@ -451,16 +454,17 @@ public class PlayerSkeletonUltimate extends RecursiveTask<FitParameters>{
 
 	/**
 	 * compute
-	 * Used for optimization using PSO
+	 * @return the number of rows cleared.
+	 * Used for testing different weights.
 	 */
 	@Override
-	protected FitParameters compute(){
+	protected Long compute(){
 		play();
-		return new FitParameters(L, Pmax, Psum, Hmax, Hsum, Rmax, Rsum, Cmax, Csum, count);
+		return L;
 	}
 	
 	static public void main(String[] args) {
-		PlayerSkeletonUltimate player = new PlayerSkeletonUltimate();
+		PlayerSkeletonTester player = new PlayerSkeletonTester();
 		player.play();
 	}
 }
